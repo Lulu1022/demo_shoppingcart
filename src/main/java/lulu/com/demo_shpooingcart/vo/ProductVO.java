@@ -11,4 +11,6 @@ public class ProductVO {
     private int productId;
     private String productName;
     private int stock;
+
+    // TODO: 可能需要增加商品圖片
 }
