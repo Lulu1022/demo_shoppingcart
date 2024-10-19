@@ -16,9 +16,19 @@ public class Product {
     @Column(name = "product_id", nullable = false)
     private Integer productId;
 
-    @NotNull
-    @Column(name = "vendor_id", nullable = false)
-    private Integer vendorId;
+    @Size(max = 255)
+    @Column(name = "product_spec")
+    private String productSpec;
+
+    @Size(max = 255)
+    @Column(name = "product_content")
+    private String productContent;
+
+    @Column(name = "price")
+    private Integer price;
+
+    @Column(name = "supplier_id")
+    private Integer supplierId;
 
     @Column(name = "stock")
     private Integer stock;

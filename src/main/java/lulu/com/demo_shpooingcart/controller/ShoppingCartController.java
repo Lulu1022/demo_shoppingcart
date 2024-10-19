@@ -1,6 +1,7 @@
 package lulu.com.demo_shpooingcart.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import lulu.com.demo_shpooingcart.entity.Picture;
 import lulu.com.demo_shpooingcart.service.ShoppingCartService;
 import lulu.com.demo_shpooingcart.vo.ProductVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,4 +48,13 @@ public class ShoppingCartController {
         List<ProductVO> cart = shoppingCartService.viewCart(userId);
         return ResponseEntity.ok(cart);
     }
+
+    // 查看購物車
+    @GetMapping("/picture")
+    @Operation(summary = "商品圖片",description = "")
+    public ResponseEntity<List<Picture>> viewPicture(@RequestParam Integer productId) {
+        List<Picture> pictures = shoppingCartService.viewProduct(productId);
+        return ResponseEntity.ok(pictures);
+    }
+
 }

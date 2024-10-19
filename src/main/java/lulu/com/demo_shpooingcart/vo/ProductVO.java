@@ -4,13 +4,29 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductVO {
-    private int productId;
-    private String productName;
-    private int stock;
 
-    // TODO: 可能需要增加商品圖片
+    private Integer supplierId;
+    private String supplierName;
+    private List<ProductItem> productList;
+
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ProductItem{
+        private Integer productId;
+        private String productName;
+        private String productSpec;
+        private String picture;
+        private Integer price;
+        private Integer quantity;
+
+    }
+
 }

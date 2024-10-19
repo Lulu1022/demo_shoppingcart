@@ -1,0 +1,95 @@
+/* <!-- 內嵌 CSS --> */
+/* 搜尋欄與篩選功能對齊 */
+.form-select,
+.form-control {
+    height: calc(3.5rem + 2px);
+    /* 設置與篩選選單相等的高度 */
+}
+
+/* 圖片大小 */
+.icon-size {
+    width: 20px;
+    height: 20px;
+}
+
+/* 商品圖片調整 */
+.product-img {
+    object-fit: cover;
+    max-width: 100%;
+}
+
+/* 調整按鈕區塊 */
+.icon-button {
+    background-color: #f8f9fa;
+    /* 灰白底色 */
+    border: none;
+    border-radius: 50%;
+    /* 圓角 */
+    padding: 5px;
+    margin-top: 5px;
+    /* 按鈕上下之間的間距 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    /* 添加陰影 */
+}
+
+/* 調整購物車和最愛按鈕的區塊 */
+.action-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.product-details {
+    flex-grow: 1;
+}
+
+.button-group {
+    display: flex;
+    flex-direction: column;
+    /* 垂直排列按鈕 */
+    align-items: center;
+}
+
+/* 商品價格的樣式 */
+.product-price {
+    color: red;
+    font-weight: bold;
+    font-size: 1.5rem;
+    /* 調整價格的大小 */
+    margin-top: 10px;
+    /* 向下移動價格 */
+}
+
+.buy-now {
+    background-color: #28a745;
+    color: white;
+    text-align: center;
+    display: inline-block;
+    padding: 10px 20px;
+    text-decoration: none;
+}
+
+/* 調整按鈕樣式 */
+button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+/* 心型圖示樣式 */
+.heart {
+    font-size: 40px;
+    color: black;
+    transition: all 0.3s ease;
+}
+
+/* 空心心型 */
+.heart.empty::before {
+    content: '♡';
+}
+
+/* 實心心型 */
+.heart.filled::before {
+    content: '♥';
+}
