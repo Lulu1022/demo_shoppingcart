@@ -117,31 +117,6 @@ function calculateTotal() {
     document.getElementById('total-amount').textContent = total.toFixed(2);
 }
 
-//前端連接api
-function putItemIntoCart(userId,productId,quantity){
-    const apiUrl = `http://localhost:8080/api/cart/update?userId=${userId}&productId=${productId}&quantity=${quantity}`;
-    fetch(apiUrl, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            alert('購物車更新成功！');
-            console.log(data);
-        })
-        .catch(error => {
-            alert('更新失敗：' + error.message);
-            console.error('There was an error!', error);
-        });
-}
-
 
 // 移除商品後更新界面
 function removeItem(button) {
@@ -192,24 +167,54 @@ async function getCheckoutItems() {
         alert('請選擇要結帳的商品');
         return;
     }
-    await checkout(selectedItems);
 
-
+    // 每次執行前清空 checkoutItems 陣列
+    checkoutItems.length = 0;
+    // 準備一個變數來存儲總金額
     selectedItems.forEach(item => {
         const cartItem = item.closest('.cart-item'); // 找到對應的商品元素
         const productId = item.getAttribute('data-product-id'); // 從 checkbox 中取得商品 ID
+        const venderId = item.getAttribute('data-supplier-id');
         const quantity = parseInt(cartItem.querySelector('.quantity').textContent); // 取得商品數量
         const price = parseFloat(cartItem.querySelector('[data-price]').dataset.price); // 取得商品價格
 
         checkoutItems.push({
             productId: productId,
             quantity: quantity,
-            price: price
+            price: price,
+            vendorId: venderId
         });
     });
 
+    console.log('購物的使用者:', fakUserId)
     console.log('被勾選的商品：', checkoutItems);
+    showSuccessModal(checkoutItems);
 
+    // try {
+    //     // 等待結帳的結果
+    //     await checkout(fakUserId, checkoutItems);
+    //
+    //     // 結帳成功後顯示提示
+    //     showSuccessModal(checkoutItems);
+    // } catch (error) {
+    //     console.error('結帳失敗:', error);
+    // }
+
+}
+
+// 顯示成功購物的 Modal
+function showSuccessModal(checkoutItems) {
+    var checkoutModal = new bootstrap.Modal(document.getElementById('checkoutModal'));
+    checkoutItemsList.innerHTML = '';  // 清空現有的列表
+
+    // 動態生成商品列表
+    checkoutItems.forEach(item => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${item.name} - 數量: ${item.quantity}, 價格: $${item.price}`;
+        checkoutItemsList.appendChild(listItem);
+    });
+
+    checkoutModal.show();
 }
 
 

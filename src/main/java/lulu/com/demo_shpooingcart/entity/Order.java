@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 
 @Getter
@@ -32,18 +33,18 @@ public class Order {
 
     @NotNull
     @Column(name = "created_datetime", nullable = false)
-    private Instant createdDatetime;
+    private Timestamp createdDatetime;
 
     @NotNull
     @Column(name = "updated_datetime", nullable = false)
-    private Instant updatedDatetime;
+    private Timestamp updatedDatetime;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "vendor_id", nullable = false)
     private Vendor vendor;
 
-    @Column(name = "pickup_date")
-    private Instant pickupDate;
+    @Column(name = "pickup_date", insertable = false, updatable = false)
+    private Timestamp pickupDate;
 
 }

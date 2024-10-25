@@ -59,14 +59,19 @@ export function updateProductQuantity(userId, productId, quantity) {
 }
 
 // 結帳
-export function checkout() {
-    const url = `http://localhost:8081/TIA103G1/OrderitemServlet`;
+export function checkout(fakUserId,checkoutItems) {
+    const url = `${port}/order`;
+    // 構建發送的資料
+    const data = {
+        userId: fakUserId,
+        items: checkoutItems
+    };
     return fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(checkoutItems)  // 將數據轉換為 JSON 字符串發送
+        body: JSON.stringify(data)  // 將數據轉換為 JSON 字符串發送
     })
         .then(response => {
             if (!response.ok) {
