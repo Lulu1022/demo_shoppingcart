@@ -58,6 +58,30 @@ export function updateProductQuantity(userId, productId, quantity) {
         });
 }
 
+// 結帳
+export function checkout() {
+    const url = `http://localhost:8081/TIA103G1/OrderitemServlet`;
+    return fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(checkoutItems)  // 將數據轉換為 JSON 字符串發送
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.text();
+        })
+        .catch(error => {
+            console.error('Error updating product quantity:', error);
+            throw error;
+        });
+}
+
+
+
 
 
 

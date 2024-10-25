@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GET Request with JavaScript</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GET Request with JavaScript</title>
 </head>
 <body>
 <h1>使用 JavaScript 發送 GET 請求</h1>
@@ -12,16 +12,16 @@
 <button onclick="sendGetRequest()">發送 GET 請求</button>
 
 <script>
-    function sendGetRequest() {
-        const param1 = document.getElementById("param1").value;
-        const url = `http://localhost:8081/test/myServlet?param1=${encodeURIComponent(param1)}`;
+  function sendGetRequest() {
+    const param1 = document.getElementById("param1").value;
+    const url = `http://localhost:8081/TIA103G1/OrderitemServlet?param1=${encodeURIComponent(param1)}`;
 
-        // 發送 GET 請求
-        fetch(url)
+    // 發送 GET 請求
+    fetch(url)
             .then(response => response.text())
             .then(data => console.log("伺服器回應:", data))
             .catch(error => console.error('錯誤:', error));
-    }
+  }
 </script>
 </body>
 </html>

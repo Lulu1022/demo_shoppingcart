@@ -1,4 +1,4 @@
-import {fetchShoppingCartList, updateProductQuantity, deleteProduct} from "./cartApi.js";
+import {fetchShoppingCartList, updateProductQuantity, deleteProduct,checkout} from "./cartApi.js";
 
 const selectAllCheckbox = document.getElementById('select-all');
 const checkboxes = document.querySelectorAll('input[type="checkbox"]');
@@ -185,13 +185,14 @@ function toggleStoreItems(supplierId, storeCheckbox) {
     calculateTotal();  // 切換商店勾選時重新計算總額
 }
 
-function getCheckoutItems() {
+async function getCheckoutItems() {
     const selectedItems = document.querySelectorAll('.item-checkbox:checked'); // 選取所有勾選的項目
 
     if (selectedItems.length === 0) {
         alert('請選擇要結帳的商品');
         return;
     }
+    await checkout(selectedItems);
 
 
     selectedItems.forEach(item => {

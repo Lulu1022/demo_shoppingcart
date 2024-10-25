@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POST Request with JavaScript</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POST Request with JavaScript</title>
 </head>
 <body>
 <h1>使用 JavaScript 發送 POST 請求</h1>
@@ -12,33 +12,21 @@
 <button onclick="sendPostRequest()">發送 POST 請求</button>
 
 <script>
-    function sendPostRequest() {
-        //const param1 = document.getElementById("param1").value;
+  function sendPostRequest() {
+    const param1 = document.getElementById("param1").value;
 
-        const arrayData = [
-            { productId: '3', quantity: 1, price: 60, venderId: 1},
-            { productId: '33', quantity: 1, price: 60, venderId: 2 }
-        ];  // 這裡是一個包含多個物件的陣列
-
-        const totalAmount = arrayData.reduce((sum, item) => sum + (item.quantity * item.price), 0);  // 計算總金額
-        const userID = fakUserId;  // 假設使用者ID，這裡可以動態獲取
-
-        // 發送 POST 請求
-        fetch('http://localhost:8081/test/myServlet', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: JSON.stringify({
-                paramArray: arrayData,
-                totalAmount: totalAmount,  // 傳遞總金額
-                userID: userID           // 傳遞使用者ID
-            })  // 將陣列封裝進 JSON，並轉成字串
-        })
+    // 發送 POST 請求
+    fetch(`http://localhost:8081/TIA103G1/OrderitemServlet?param1=${encodeURIComponent(param1)}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: 'param1=' + encodeURIComponent(param1)
+    })
             .then(response => response.text())
             .then(data => console.log("伺服器回應:", data))
             .catch(error => console.error('錯誤:', error));
-    }
+  }
 </script>
 </body>
 </html>
