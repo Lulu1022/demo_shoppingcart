@@ -208,6 +208,7 @@ function getCheckoutItems() {
     });
 
     console.log('被勾選的商品：', checkoutItems);
+
 }
 
 
@@ -291,3 +292,4 @@ window.calculateTotal = calculateTotal;
 window.onload = function() {
     getShoppingCartList(fakUserId);
 };
+

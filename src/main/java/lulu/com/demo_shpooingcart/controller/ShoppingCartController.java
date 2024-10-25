@@ -28,7 +28,7 @@ public class ShoppingCartController {
     // 移除商品
     @DeleteMapping("/remove")
     @Operation(summary = "商品從購物車中刪除",description = "userId: 使用者編號, productId: 商品編號   該商品會從購物車內直接被移除")
-    public ResponseEntity<String> removeProductFromCart(@RequestParam Long userId, @RequestParam Long productId) {
+    public ResponseEntity<String> removeProductFromCart(@RequestParam Integer userId, @RequestParam Integer productId) {
         shoppingCartService.removeProductFromCart(userId, productId);
         return ResponseEntity.ok("商品成功移出購物車");
     }

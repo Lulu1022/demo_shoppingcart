@@ -46,9 +46,13 @@ public class ShoppingCartService {
     }
 
     // 從購物車中移除商品
-    public void removeProductFromCart(Long userId, Long productId) {
+    public void removeProductFromCart(Integer userId, Integer productId) {
         String cartKey = "cart:" + userId;
         redisTemplate.opsForHash().delete(cartKey, productId.toString());
+
+        // TODO: 檢查是否還有庫存
+
+
     }
 
     // 更新購物車中的商品數量
