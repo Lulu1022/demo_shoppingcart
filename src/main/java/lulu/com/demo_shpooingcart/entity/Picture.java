@@ -18,7 +18,7 @@ public class Picture {
     @Column(name = "pic_created_datetime")
     private Instant picCreatedDatetime;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id")
     private Product product;
 

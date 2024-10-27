@@ -114,7 +114,7 @@ function calculateTotal() {
         total += price * quantity;
     });
     console.log("目前總金額:",total);
-    document.getElementById('total-amount').textContent = total.toFixed(2);
+    document.getElementById('total-amount').textContent = total;
 }
 
 
@@ -299,3 +299,4 @@ window.onload = function() {
     getShoppingCartList(fakUserId);
 };
 
+//

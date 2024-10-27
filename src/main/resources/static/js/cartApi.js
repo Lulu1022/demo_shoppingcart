@@ -12,6 +12,7 @@ export async function fetchShoppingCartList(userId) {
     }
 }
 
+
 // 移除商品功能
 function removeItem(button) {
     // const cartItem = button.closest('.cart-item');

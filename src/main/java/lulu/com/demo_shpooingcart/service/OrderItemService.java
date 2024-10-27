@@ -7,12 +7,15 @@ import lulu.com.demo_shpooingcart.repository.OrderItemRepository;
 import lulu.com.demo_shpooingcart.repository.OrderRepository;
 import lulu.com.demo_shpooingcart.vo.CheckoutItem;
 import lulu.com.demo_shpooingcart.vo.CheckoutRequest;
+import lulu.com.demo_shpooingcart.vo.MyOrderItemResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderItemService {
@@ -77,11 +80,50 @@ public class OrderItemService {
             orderItemRepository.save(orderitem);
         }
 
-
-
-
-
-
-
     }
+
+    public List<Orderitem> getAll(Integer orderitemId){
+        return orderItemRepository.findAll();
+    }
+
+
+    public List<Order> getMyOrder(Integer userId){
+        // 購物車成功下單的商品
+        return orderRepository.findByUser_Id(userId);
+    }
+    public List<MyOrderItemResponse> getmyOrderitems(Integer orderId) {
+        List<Object[]> orderDetailsByOrderId = orderItemRepository.findOrderDetailsByOrderId(orderId);
+
+        List<MyOrderItemResponse> myOrderItems = orderDetailsByOrderId.stream().map(item -> {
+            Integer orderid = (Integer) item[0];
+            Integer userId = (Integer) item[1];
+            Integer totalAmount = (Integer) item[2];
+            Timestamp createDatetime = (Timestamp) item[3];
+            Integer vendorId = (Integer) item[4];
+            Timestamp pickupDatetime = (Timestamp) item[5];
+            Integer productId = (Integer) item[6];
+            Integer quantity = (Integer) item[7];
+            Integer price = (Integer) item[8];
+            String pickaddress = (String) item[9];
+            String productName = (String) item[10];
+            String shopName = (String) item[11];
+            String userName = (String) item[12];
+            String email = (String) item[13];
+
+
+            MyOrderItemResponse orderItem = new MyOrderItemResponse(
+                    orderid, userId, totalAmount, createDatetime, vendorId,
+                    pickupDatetime, productId, quantity, price,pickaddress,
+                    productName, shopName, userName, email
+            );
+
+            // 打印每個 MyOrderItemResponse 的內容
+            System.out.println("Order Item: " + orderItem);
+
+            return orderItem;
+        }).collect(Collectors.toList());
+
+        return myOrderItems;
+    }
+
 }

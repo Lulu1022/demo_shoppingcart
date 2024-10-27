@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的訂單紀錄</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/order_history.css">
+</head>
+
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- 側邊欄 -->
+        <div class="col-md-1 sidebar">
+            <a href="#">購物商城</a>
+            <a href="#">訂單紀錄</a>
+            <a href="#">我的最愛</a>
+            <a href="#">購物車</a>
+        </div>
+
+        <!-- 主內容區域 -->
+        <div class="col-md-11 main-content">
+            <h3 class="mt-4">我的訂單紀錄</h3>
+            <table id="orderTable" class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>訂單編號</th>
+                    <th>訂購日期</th>
+                    <th>商城名稱</th>
+                    <th>金額合計</th>
+                    <th>預計取貨時間</th>
+                </tr>
+                </thead>
+                <tbody id="orderTableBody">
+                <!-- 訂單資料 -->
+                </tbody>
+            </table>
+
+
+            <!-- 分頁功能 -->
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center" id="pagination">
+                    <li class="page-item disabled" id="prevPage">
+                        <a class="page-link" href="javascript:void(0);" onclick="loadPage(currentPage - 1)">上一頁</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="javascript:void(0);" onclick="loadPage(1)">1</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="javascript:void(0);" onclick="loadPage(2)">2</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="javascript:void(0);" onclick="loadPage(3)">3</a>
+                    </li>
+                    <li class="page-item" id="nextPage">
+                        <a class="page-link" href="javascript:void(0);" onclick="loadPage(currentPage + 1)">下一頁</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+
+<!-- 訂單彈出視窗 -->
+<div id="orderPopup" class="popup">
+    <div class="popup-content">
+        <div class="popup-header">
+            <h2 id="shopname">★商城AAA★</h2>
+            <span class="close-btn" onclick="closePopup()">×</span>
+        </div>
+        <p>感謝您的支持和信任，這是您的訂單</p>
+        <div class="order-details">
+            <h3>訂單詳情</h3>
+            <table>
+                <tr>
+                    <th>訂購姓名</th>
+                    <td id="username">範例姓名</td> <!-- 插入靜態資料 -->
+                </tr>
+                <tr>
+                    <th>E-mail</th>
+                    <td id="email">example@example.com</td> <!-- 插入靜態資料 -->
+                </tr>
+                <tr>
+                    <th>訂單號碼</th>
+                    <td id="orderId">123456789</td> <!-- 插入靜態資料 -->
+                </tr>
+                <tr>
+                    <th>訂購日期</th>
+                    <td id="createTime">2024-10-28</td> <!-- 插入靜態資料 -->
+                </tr>
+                <tr>
+                    <th>訂單金額</th>
+                    <td id="totalAmount">NT$ 1200</td> <!-- 插入靜態資料 -->
+                </tr>
+                <tr>
+                    <th>預計取貨時間</th>
+                    <td id="pickTime">2024-10-29</td> <!-- 插入靜態資料 -->
+                </tr>
+                <tr>
+                    <th>付款方式</th>
+                    <td>現金</td> <!-- 插入靜態資料 -->
+                </tr>
+                <tr>
+                    <th>取貨地址</th>
+                    <td id="pickAddress">台北市某路123號</td> <!-- 插入靜態資料 -->
+                </tr>
+            </table>
+
+            <h3>訂購商品明細</h3>
+            <div class="product-details">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>商品名稱</th>
+                        <th>數量</th>
+                        <th>小計</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>商品A</td> <!-- 插入靜態資料 -->
+                        <td>2</td> <!-- 插入靜態資料 -->
+                        <td>NT$ 600</td> <!-- 小計: 商品價格 * 數量 -->
+                    </tr>
+                    <tr>
+                        <td>商品B</td> <!-- 插入靜態資料 -->
+                        <td>1</td> <!-- 插入靜態資料 -->
+                        <td>NT$ 300</td> <!-- 小計: 商品價格 * 數量 -->
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/global.js"></script>
+
+<script>
+
+    function closePopup() {
+        document.getElementById('orderPopup').style.display = 'none';
+    }
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            console.error("Invalid date format:", dateString);
+            return dateString; // 無法解析時回傳原日期字串
+        }
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+
+        return `${year}-${month}-${day} ${hours}:${minutes}`;
+    }
+
+    // 定義 API URL
+    const userId = 'exampleUserId'; // 替代 fakUserId
+    const apiUrl = `http://localhost:8083/order/${fakUserId}`;
+
+    function getOrder(userId) {
+        // 使用 fetch API 取得訂單資料
+        fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // 顯示訂單資料
+                console.log(data);
+                displayOrders(data);
+            })
+            .catch(error => {
+                console.error('Error fetching order data:', error);
+            });
+
+    }
+
+    getOrder(fakUserId);
+
+    // 顯示訂單資料的函數
+    function displayOrders(orders) {
+        const orderTableBody = document.getElementById('orderTableBody');
+        orderTableBody.innerHTML = '';  // 清空列表
+        orders.forEach(order => {
+            const tr = document.createElement('tr');
+
+            // 取得訂單詳情並顯示在表格中
+            getOrderItems(order.id).then(orderItems => {
+                orderItems.forEach(item => {
+                    tr.innerHTML = `
+                    <td>${item.orderId}</td>
+                    <td>${formatDate(item.createTime)}</td>
+                    <td>${item.shopName}</td>
+                    <td>$${item.totalAmount}</td>
+                    <td>${formatDate(item.pickTime)}</td>
+                    <td><button onclick='showPopup(${JSON.stringify(item)})'>顯示訂單</button></td>
+                `;
+                    orderTableBody.appendChild(tr); // 追加到表格
+                });
+            }).catch(err => console.log(err));
+
+            orderTableBody.appendChild(tr);
+        });
+    }
+
+    // 獲取訂單項目
+    async function getOrderItems(orderId) {
+        try {
+            const res = await fetch(`/order/findOrderDetailsByOrderId/${orderId}`);
+            // 先打印出原始 Response 物件
+            console.log("Response object:", res);
+
+            // 解析 JSON 之前，再次打印 JSON 資料
+            const data = await res.json();
+            console.log("Parsed JSON data:", data);
+
+            return data;
+        } catch (err) {
+            console.log("Error fetching order items:", err);
+            return [];
+        }
+    }
+
+    // 顯示訂單細節視窗
+   async function showPopup(object) {
+        console.log("我亮了")
+        console.log(object);
+        document.getElementById('orderPopup').style.display = 'flex';
+        document.getElementById('shopname').innerHTML=object.shopName;
+        document.getElementById('username').innerText = object.username;
+        document.getElementById('email').innerText = object.email;
+        document.getElementById('orderId').innerText = object.orderId;
+        document.getElementById('createTime').innerText = formatDate(object.createTime);
+        document.getElementById('totalAmount').innerText = `NT$ ${object.totalAmount}`;
+        document.getElementById('pickTime').innerText = formatDate(object.pickTime);
+        document.getElementById('pickAddress').innerText = object.pickAddress;
+
+        // 渲染商品明細
+        const productDetailsBody = document.querySelector('.product-details tbody');
+        productDetailsBody.innerHTML = ''; // 清空舊的商品明細
+
+        try {
+            // 使用 await 獲取訂單明細
+            const orderItems = await getOrderItems(object.orderId);
+
+            // 假設 orderItems 是商品明細的陣列
+            orderItems.forEach(item => {
+                const tr = document.createElement('tr');
+                const subtotal = item.price * item.quantity;
+
+                tr.innerHTML = `
+                <td>${item.productName}</td>
+                <td>${item.quantity}</td>
+                <td>NT$ ${subtotal}</td>
+            `;
+
+                // 插入到商品明細表格中
+                productDetailsBody.appendChild(tr);
+            });
+        } catch (error) {
+            console.error("Error loading order items:", error);
+        }
+
+    }
+
+
+    var currentPage = 1;
+    var itemsPerPage = 3;
+
+
+</script>
+</html>

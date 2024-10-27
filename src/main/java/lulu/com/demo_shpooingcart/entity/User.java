@@ -16,5 +16,8 @@ public class User {
     @Column(name = "user_id", nullable = false)
     private Integer id;
 
+    @Column(name = "username",nullable = false)
+    private String username;
+
     //TODO [JPA Buddy] generate columns from DB
 }

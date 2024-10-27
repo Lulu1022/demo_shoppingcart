@@ -1,5 +1,6 @@
 package lulu.com.demo_shpooingcart.entity;
 
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -30,5 +31,9 @@ public class Orderitem {
     @NotNull
     @Column(name = "price", nullable = false)
     private Integer price;
+
+    @NotNull
+    @Column(name = "pick_adress", nullable = false)
+    private String pickAddress;
 
 }
