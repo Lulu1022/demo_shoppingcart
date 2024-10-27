@@ -77,11 +77,15 @@ public class OrderItemService {
             orderItemRepository.save(orderitem);
         }
 
+    }
+
+    public List<Orderitem> getAll(Integer orderitemId){
+        return orderItemRepository.findAll();
+    }
 
 
-
-
-
-
+    public List<Order> getMyOrder(Integer userId){
+        // 購物車成功下單的商品
+        return orderRepository.findByUser_Id(userId);
     }
 }

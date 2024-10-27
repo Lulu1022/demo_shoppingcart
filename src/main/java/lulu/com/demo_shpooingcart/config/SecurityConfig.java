@@ -1,4 +1,4 @@
-package lulu.com.demo_shpooingcart.config;// 使用 Spring Security
+//package lulu.com.demo_shpooingcart.config;// 使用 Spring Security
 //package com.lulu.config;
 //import org.springframework.context.annotation.Bean;
 //import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,4 +20,4 @@ package lulu.com.demo_shpooingcart.config;// 使用 Spring Security
 //        return http.build();
 //    }
 //}
-//
+

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的訂單紀錄</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/order_history.css">
+</head>
+
+<body>
+<div class="container-fluid">
+  <div class="row">
+    <!-- 側邊欄 -->
+    <div class="col-md-1 sidebar">
+      <a href="#">購物商城</a>
+      <a href="#">訂單紀錄</a>
+      <a href="#">我的最愛</a>
+      <a href="#">購物車</a>
+    </div>
+
+    <!-- 主內容區域 -->
+    <div class="col-md-11 main-content">
+      <h3 class="mt-4">我的訂單紀錄</h3>
+      <table id="orderTable" class="table table-bordered table-hover">
+        <thead>
+        <tr>
+          <th>訂單編號</th>
+          <th>訂購日期</th>
+          <th>商城名稱</th>
+          <th>金額合計</th>
+          <th>預計取貨時間</th>
+        </tr>
+        </thead>
+        <tbody id="orderTableBody">
+        <!-- 訂單資料 -->
+        </tbody>
+      </table>
+
+      <!-- 訂單詳細資訊 Modal -->
+      <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="orderModalLabel">訂單詳細資訊</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p><strong>訂單編號：</strong><span id="modalOrderID"></span></p>
+              <p><strong>訂購日期：</strong><span id="modalOrderDate"></span></p>
+              <p><strong>商城名稱：</strong><span id="modalStoreName"></span></p>
+              <p><strong>金額合計：</strong><span id="modalOrderTotal"></span></p>
+              <p><strong>預計取貨時間：</strong><span id="modalPickupDate"></span></p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 分頁功能 -->
+      <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center" id="pagination">
+          <li class="page-item disabled" id="prevPage">
+            <a class="page-link" href="javascript:void(0);" onclick="loadPage(currentPage - 1)">上一頁</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="javascript:void(0);" onclick="loadPage(1)">1</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="javascript:void(0);" onclick="loadPage(2)">2</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="javascript:void(0);" onclick="loadPage(3)">3</a>
+          </li>
+          <li class="page-item" id="nextPage">
+            <a class="page-link" href="javascript:void(0);" onclick="loadPage(currentPage + 1)">下一頁</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/global.js"></script>
+
+<script>
+  // 定義 API URL
+  const apiUrl = `http://localhost:8083/order/${fakUserId}`;
+
+  function getOrder(userId){
+    // 使用 fetch API 取得訂單資料
+    fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json'
+      }
+    })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then(data => {
+              // 顯示訂單資料
+              console.log(data);
+              displayOrders(data);
+            })
+            .catch(error => {
+              console.error('Error fetching order data:', error);
+            });
+
+  }
+  getOrder(fakUserId);
+
+  // 顯示訂單資料的函數
+  function displayOrders(orders) {
+    const orderTableBody = document.getElementById('orderTableBody');
+    orderTableBody.innerHTML = '';  // 清空列表
+
+    orders.forEach(order => {
+      const tr = document.createElement('tr');
+      orderItem.innerHTML = `
+
+    <td>
+      <a href="javascript:void(0)" class="order-link" onclick="showOrderDetails('${oId}', '2024/11/11', '商城AA', '$1,201', '2024/11/25')">
+        ${oId}
+      </a>
+    </td>
+    <td>2024/11/11</td>
+    <td>商城AA</td>
+    <td>$1,201</td>
+    <td>2024/11/25</td>
+  `;
+
+      orderTableBody.appendChild(orderItem);
+    });
+  }
+
+
+
+
+
+
+
+
+
+
+
+  // var orders = [
+  //   { id: '${oId}', date: '2024/11/11', store: '商城AA', total: '$1,201', pickup: '2024/11/25' },
+  //   { id: '202411112359002', date: '2024/10/28', store: '商城BB', total: '$699', pickup: '2024/11/21' },
+  //   { id: '202408312130002', date: '2024/09/09', store: '商城AA', total: '$4,321', pickup: '2024/09/01' },
+  //   { id: '20245443325002', date: '2024/08/31', store: '商城CC', total: '$4,321', pickup: '2024/09/01' },
+  //   { id: '202402354758894', date: '2024/08/23', store: '商城AA', total: '$4,321', pickup: '2024/09/01' },
+  //   { id: '20478878930972', date: '2024/08/12', store: '商城BB', total: '$4,321', pickup: '2024/09/01' },
+  //   { id: '2040785808072', date: '2024/07/11', store: '商城CC', total: '$4,321', pickup: '2024/09/01' },
+  //   { id: '20404245555002', date: '2024/05/21', store: '商城DD', total: '$4,321', pickup: '2024/09/01' },
+  //   { id: '20425535578902', date: '2024/03/05', store: '商城EE', total: '$4,321', pickup: '2024/09/01' },
+  //   { id: '2042856893762', date: '2024/01/22', store: '商城AA', total: '$4,321', pickup: '2024/09/01' }
+  // ];
+
+  var currentPage = 1;
+  var itemsPerPage = 3;
+
+  // function loadPage(page) {
+  //   currentPage = page;
+  //   var start = (currentPage - 1) * itemsPerPage;
+  //   var end = start + itemsPerPage;
+  //   var paginatedOrders = orders.slice(start, end);
+  //
+  //   var tableBody = document.getElementById('orderTableBody');
+  //   tableBody.innerHTML = '';
+  //
+  //   paginatedOrders.forEach(function (order) {
+  //     var row = `<tr>
+  //                    <td><a href="javascript:void(0)" class="order-link" onclick="showOrderDetails('${order.id}', '${order.date}', '${order.store}', '${order.total}', '${order.pickup}')">${order.id}</a></td>
+  //                    <td>${order.date}</td>
+  //                    <td>${order.store}</td>
+  //                    <td>${order.total}</td>
+  //                    <td>${order.pickup}</td>
+  //                  </tr>`;
+  //     tableBody.innerHTML += row;
+  //   });
+  //
+  //   updatePagination();
+  // }
+
+  // function updatePagination() {
+  //   document.getElementById('prevPage').classList.toggle('disabled', currentPage === 1);
+  //   document.getElementById('nextPage').classList.toggle('disabled', currentPage === Math.ceil(orders.length / itemsPerPage));
+  // }
+
+  function showOrderDetails(orderID, orderDate, storeName, orderTotal, pickupDate) {
+    document.getElementById('modalOrderID').textContent = orderID;
+    document.getElementById('modalOrderDate').textContent = orderDate;
+    document.getElementById('modalStoreName').textContent = storeName;
+    document.getElementById('modalOrderTotal').textContent = orderTotal;
+    document.getElementById('modalPickupDate').textContent = pickupDate;
+
+    var orderModal = new bootstrap.Modal(document.getElementById('orderModal'));
+    orderModal.show();
+  }
+
+  // 初始載入第 1 頁
+  loadPage(1);
+</script>
+</body>
+
+</html>

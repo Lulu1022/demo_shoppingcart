@@ -1,17 +1,19 @@
 package lulu.com.demo_shpooingcart.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.sql.Timestamp;
-import java.time.Instant;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "orders")
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +21,7 @@ public class Order {
     private Integer id;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -40,7 +42,7 @@ public class Order {
     private Timestamp updatedDatetime;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "vendor_id", nullable = false)
     private Vendor vendor;
 
