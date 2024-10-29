@@ -3,7 +3,7 @@ package lulu.com.demo_shpooingcart.vo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+
 
 import java.sql.Timestamp;
 
