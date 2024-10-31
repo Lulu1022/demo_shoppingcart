@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
+import java.time.Instant;
 
 
 @Getter
@@ -39,5 +40,20 @@ public class Product {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vendor_id")
     private Vendor vendor;
+
+    @Column(name = "created_time")
+    private Instant createdTime;
+
+    @Column(name = "updated_time")
+    private Instant updatedTime;
+
+    @Column(name = "product_type")
+    private Integer productType;
+
+    @Column(name = "updaped_at")
+    private Instant updapedAt;
+
+    @Column(name = "ad")
+    private Integer ad;
 
 }

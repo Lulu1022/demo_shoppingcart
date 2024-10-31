@@ -17,6 +17,9 @@ async function getShoppingCartList(userId) {
         document.getElementById('allSchedule').innerHTML='';
 
         const currentDate = new Date();
+        // 加上 7 天
+        currentDate.setDate(currentDate.getDate() + 7);
+        // 格式化為 YYYY-MM-DD
         const formattedDate = currentDate.toISOString().split('T')[0];
 
 
