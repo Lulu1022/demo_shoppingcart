@@ -29,14 +29,15 @@ public class Product {
     @Column(name = "price")
     private Integer price;
 
-    @Column(name = "supplier_id")
-    private Integer supplierId;
-
     @Column(name = "stock")
     private Integer stock;
 
     @Size(max = 50)
     @Column(name = "product_name", length = 50)
     private String productName;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vendor_id")
+    private Vendor vendor;
 
 }

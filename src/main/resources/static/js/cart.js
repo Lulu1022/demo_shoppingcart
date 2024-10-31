@@ -1,4 +1,4 @@
-import {fetchShoppingCartList, updateProductQuantity, deleteProduct,checkout} from "./cartApi.js";
+import {fetchShoppingCartList, updateProductQuantity, deleteProduct,deleteProducts,checkout} from "./cartApi.js";
 
 const selectAllCheckbox = document.getElementById('select-all');
 const checkboxes = document.querySelectorAll('input[type="checkbox"]');
@@ -16,6 +16,9 @@ async function getShoppingCartList(userId) {
 
         document.getElementById('allSchedule').innerHTML='';
 
+        const currentDate = new Date();
+        const formattedDate = currentDate.toISOString().split('T')[0];
+
 
         data.forEach(item => {
             console.log(item);
@@ -28,7 +31,7 @@ async function getShoppingCartList(userId) {
             const supplierDiv = document.createElement('div');
             supplierDiv.className = 'schedule';
             supplierDiv.innerHTML=`<input data-supplier-id="${supplierId}" type="checkbox" id="store-a-checkbox" onclick="toggleStoreItems(${supplierId}, this)">
-                    <label for="store-a-checkbox" class="mall-label">${supplierName}</label> 預計取貨時間：2024/11/25`;
+                    <label for="store-a-checkbox" class="mall-label">${supplierName}</label> 預計取貨時間：${formattedDate}`;
             shop.append(supplierDiv);
 
             productList.forEach(product =>{
@@ -42,7 +45,7 @@ async function getShoppingCartList(userId) {
                     <input data-product-id=${productId} data-supplier-id="${supplierId}" type="checkbox" class="store-b-checkbox item-checkbox" onclick="calculateTotal()">
                 </div>
                 <div class="col-md-2">
-                    <img src="https://via.placeholder.com/100" alt="商品100" class="img-fluid">
+                    <img src="${port}/api/cart/picture/${productId}" alt="商品圖" class="img-fluid">
                 </div>
                 <div class="col-md-5">
                     <h5>${productName}</h5>
@@ -160,14 +163,33 @@ function toggleStoreItems(supplierId, storeCheckbox) {
     calculateTotal();  // 切換商店勾選時重新計算總額
 }
 
-async function getCheckoutItems() {
-    const selectedItems = document.querySelectorAll('.item-checkbox:checked'); // 選取所有勾選的項目
+// 獲取前往結帳按鈕
+const checkoutButton = document.querySelector(".btn.btn-primary");
 
+// 為按鈕添加點擊事件監聽器
+checkoutButton.addEventListener("click", function(event) {
+    getCheckoutItems(event);
+});
+
+async function getCheckoutItems(event) {
+
+    // 驗證地址是否填寫
+    if (!orderForm.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+        orderForm.classList.add('was-validated'); // 添加 Bootstrap 驗證樣式
+        return; // 直接返回，不執行後續程式碼
+    }
+    // 驗證是否已選擇產品
+    const selectedItems = document.querySelectorAll('.item-checkbox:checked'); // 選取所有勾選的項目
     if (selectedItems.length === 0) {
         alert('請選擇要結帳的商品');
         return;
     }
 
+
+
+    const address = document.getElementById('delivery-address').innerText;
     // 每次執行前清空 checkoutItems 陣列
     checkoutItems.length = 0;
     // 準備一個變數來存儲總金額
@@ -177,7 +199,6 @@ async function getCheckoutItems() {
         const venderId = item.getAttribute('data-supplier-id');
         const quantity = parseInt(cartItem.querySelector('.quantity').textContent); // 取得商品數量
         const price = parseFloat(cartItem.querySelector('[data-price]').dataset.price); // 取得商品價格
-
         checkoutItems.push({
             productId: productId,
             quantity: quantity,
@@ -188,34 +209,40 @@ async function getCheckoutItems() {
 
     console.log('購物的使用者:', fakUserId)
     console.log('被勾選的商品：', checkoutItems);
+    console.log('地址:',address);
     showSuccessModal(checkoutItems);
 
-    // try {
-    //     // 等待結帳的結果
-    //     await checkout(fakUserId, checkoutItems);
-    //
-    //     // 結帳成功後顯示提示
-    //     showSuccessModal(checkoutItems);
-    // } catch (error) {
-    //     console.error('結帳失敗:', error);
-    // }
+    try {
+        // 等待結帳的結果
+        await checkout(fakUserId, checkoutItems,address);
+
+        // 移除購物車中已購買的商品
+        const productIds = checkoutItems.map(item => item.productId);
+        await deleteProducts(fakUserId, productIds);
+
+        // 重新取得購物車內容
+        await getShoppingCartList(fakUserId);
+
+        // 結帳成功後顯示提示
+        showSuccessModal(checkoutItems);
+
+    } catch (error) {
+        console.error('結帳失敗:', error);
+    }
 
 }
 
 // 顯示成功購物的 Modal
 function showSuccessModal(checkoutItems) {
-    var checkoutModal = new bootstrap.Modal(document.getElementById('checkoutModal'));
-    checkoutItemsList.innerHTML = '';  // 清空現有的列表
-
-    // 動態生成商品列表
-    checkoutItems.forEach(item => {
-        const listItem = document.createElement('li');
-        listItem.textContent = `${item.name} - 數量: ${item.quantity}, 價格: $${item.price}`;
-        checkoutItemsList.appendChild(listItem);
+    var checkoutModal = new bootstrap.Modal(document.getElementById('checkoutModal'),{
+        backdrop: false
     });
-
     checkoutModal.show();
 }
+document.getElementById('checkoutModal').addEventListener('hidden.bs.modal', function () {
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+});
+
 
 
 let currentStep = 1;

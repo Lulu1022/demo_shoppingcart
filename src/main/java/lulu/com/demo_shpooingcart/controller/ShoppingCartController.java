@@ -1,10 +1,10 @@
 package lulu.com.demo_shpooingcart.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import lulu.com.demo_shpooingcart.entity.Picture;
 import lulu.com.demo_shpooingcart.service.ShoppingCartService;
 import lulu.com.demo_shpooingcart.vo.ProductVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,12 +25,21 @@ public class ShoppingCartController {
         return ResponseEntity.ok("商品成功加入購物車");
     }
 
-    // 移除商品
+
+    // 移除單個商品
     @DeleteMapping("/remove")
     @Operation(summary = "商品從購物車中刪除",description = "userId: 使用者編號, productId: 商品編號   該商品會從購物車內直接被移除")
     public ResponseEntity<String> removeProductFromCart(@RequestParam Integer userId, @RequestParam Integer productId) {
         shoppingCartService.removeProductFromCart(userId, productId);
         return ResponseEntity.ok("商品成功移出購物車");
+    }
+
+    // 移除多個商品
+    @DeleteMapping("/remove/batchproducts")
+    @Operation(summary = "商品從購物車中多個刪除",description = "")
+    public ResponseEntity<String> removeProductsFromCart(@RequestParam Integer userId, @RequestParam List<Integer> productIds) {
+        shoppingCartService.removeProductsFromCart(userId, productIds);
+        return ResponseEntity.ok("多個商品成功移出購物車");
     }
 
     // 更新商品數量
@@ -45,16 +54,18 @@ public class ShoppingCartController {
     @GetMapping("/view")
     @Operation(summary = "查看購物中的商品",description = "會回傳 ProductVO 包含 商品編號, 商品名稱, 剩餘庫存")
     public ResponseEntity<List<ProductVO>> viewCart(@RequestParam Integer userId) {
-        List<ProductVO> cart = shoppingCartService.viewCart(userId);
+        List<ProductVO> cart = shoppingCartService.testviewCart(userId);
         return ResponseEntity.ok(cart);
     }
 
     // 查看購物車
-    @GetMapping("/picture")
+    @GetMapping("/picture/{productId}")
     @Operation(summary = "商品圖片",description = "")
-    public ResponseEntity<List<Picture>> viewPicture(@RequestParam Integer productId) {
-        List<Picture> pictures = shoppingCartService.viewProduct(productId);
-        return ResponseEntity.ok(pictures);
+    public ResponseEntity<byte[]> viewPicture(@PathVariable Integer productId) {
+        byte[] image = shoppingCartService.productPicture(productId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG) // 根據圖片類型設置 Content-Type
+                .body(image);
     }
 
 }

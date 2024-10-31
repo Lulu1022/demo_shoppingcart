@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Getter
 @Setter
@@ -34,7 +35,7 @@ public class Orderitem {
     private Integer price;
 
     @NotNull
-    @Column(name = "pick_adress", nullable = false)
+    @Column(name = "pick_address", nullable = false)
     private String pickAddress;
 
 }

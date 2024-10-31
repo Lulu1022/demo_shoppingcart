@@ -13,16 +13,22 @@ export async function fetchShoppingCartList(userId) {
 }
 
 
-// 移除商品功能
-function removeItem(button) {
-    // const cartItem = button.closest('.cart-item');
-    // cartItem.remove();
-    // calculateTotal();  // 移除商品時重新計算總額
-    const productId = button.dataset.productId;
-    console.log(productId);
-    //TODO: 呼叫 DELETE API 傳入 fakUserId productId
+export function addProduct(userId,productId,quantity){
+    const url = `/api/cart/add?userId=${userId}&productId=${productId}&quantity=${quantity}`;
+    return fetch(url, {
+        method: 'POST',
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.text();
+        });
 }
-
 export function deleteProduct(userId, productId){
     const url = `${port}/api/cart/remove?userId=${userId}&productId=${productId}`;
     return fetch(url, {
@@ -38,6 +44,30 @@ export function deleteProduct(userId, productId){
             return response.text();
         });
 }
+
+export function deleteProducts(userId, productIds) {
+    // 建立查詢參數
+    const queryParams = new URLSearchParams();
+    queryParams.append('userId', userId);
+    productIds.forEach(id => queryParams.append('productIds', id));
+
+    // 完整 URL
+    const url = `${port}/api/cart/remove/batchproducts?${queryParams.toString()}`;
+
+    return fetch(url, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.text();
+        });
+}
+
 
 export function updateProductQuantity(userId, productId, quantity) {
     const url = `${port}/api/cart/update?userId=${userId}&productId=${productId}&quantity=${quantity}`;
@@ -59,13 +89,22 @@ export function updateProductQuantity(userId, productId, quantity) {
         });
 }
 
+
+// 獲取前往結帳按鈕
+const checkoutButton = document.querySelector(".btn.btn-primary");
+
+// 為按鈕添加點擊事件監聽器
+checkoutButton.addEventListener("click", function(event) {
+    getCheckoutItems(event);
+});
 // 結帳
-export function checkout(fakUserId,checkoutItems) {
+export function checkout(fakUserId,checkoutItems,address) {
     const url = `${port}/order`;
     // 構建發送的資料
     const data = {
         userId: fakUserId,
-        items: checkoutItems
+        items: checkoutItems,
+        address: address
     };
     return fetch(url, {
         method: 'POST',

@@ -18,6 +18,7 @@ public class OrderitemController {
     @Autowired
     private OrderItemService orderItemService;
     @PostMapping("/order")
+    @Operation(summary = "成功購買",description = "前往結帳按鈕")
     public ResponseEntity<String> processCheckout(@RequestBody CheckoutRequest checkoutRequest) {
         orderItemService.saveOrder(checkoutRequest);
         return ResponseEntity.ok("成功購買");

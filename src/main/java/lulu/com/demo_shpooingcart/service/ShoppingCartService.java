@@ -1,20 +1,13 @@
 package lulu.com.demo_shpooingcart.service;
 
-import lulu.com.demo_shpooingcart.entity.Picture;
-import lulu.com.demo_shpooingcart.entity.Product;
-import lulu.com.demo_shpooingcart.entity.Vendor;
-import lulu.com.demo_shpooingcart.repository.PictureRepository;
-import lulu.com.demo_shpooingcart.repository.ProductRepository;
-import lulu.com.demo_shpooingcart.repository.VendorRepository;
+import lulu.com.demo_shpooingcart.entity.*;
+import lulu.com.demo_shpooingcart.repository.*;
 import lulu.com.demo_shpooingcart.vo.ProductVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -29,6 +22,10 @@ public class ShoppingCartService {
     private VendorRepository vendorRepository;
     @Autowired
     private PictureRepository pictureRepository;
+    @Autowired
+    private OrderRepository orderRepository;
+    @Autowired
+    private OrderItemRepository orderItemRepository;
 
 
     // 加入商品到購物車
@@ -45,10 +42,22 @@ public class ShoppingCartService {
         redisTemplate.opsForHash().put(cartKey, productId.toString(), quantity);
     }
 
-    // 從購物車中移除商品
+    // 從購物車中移除單個商品
     public void removeProductFromCart(Integer userId, Integer productId) {
         String cartKey = "cart:" + userId;
         redisTemplate.opsForHash().delete(cartKey, productId.toString());
+
+        // TODO: 檢查是否還有庫存
+
+
+    }
+
+    // 從購物車中移除多個商品
+    public void removeProductsFromCart(Integer userId, List<Integer> productId) {
+        String cartKey = "cart:" + userId;
+        for (Integer id : productId) {
+            redisTemplate.opsForHash().delete(cartKey, id.toString());
+        }
 
         // TODO: 檢查是否還有庫存
 
@@ -68,101 +77,56 @@ public class ShoppingCartService {
         }
     }
 
-    // 查看購物車內容
-//    public List<ProductVO> viewCart(Integer userId) {
-//        String cartKey = "cart:" + userId;
-//        Map<Object, Object> cartResult = redisTemplate.opsForHash().entries(cartKey);
-//
-//
-//        // 將 Redis 中的 Hash 組成 ProductVO
-//        return cartResult.entrySet().stream()
-//                .map(entry -> {
-//                    int productId = Integer.parseInt(entry.getKey().toString());
-//                    int stock = Integer.parseInt(entry.getValue().toString());
-//
-//                    // 從資料庫查詢 productName
-//                    Product product = productRepository.findByProductId(productId);
-//
-//                    // 返回 ProductVO
-//                    return new ProductVO(productId, product.getProductName(), stock);
-//                })
-//                .collect(Collectors.toList());
-//    }
-
-    public List<ProductVO> viewCart(Integer userId) {
+    public List<ProductVO> testviewCart(Integer userId) {
         String cartKey = "cart:" + userId;
 
-        Map<Object, Object> cartResult = redisTemplate.opsForHash().entries(cartKey);
+        // 從 Redis 中獲取購物車所有產品購買數量並轉換為 Integer Map
+        Map<Integer, Integer> cartResult = redisTemplate.opsForHash().entries(cartKey).entrySet().stream()
+                .collect(Collectors.toMap(
+                        e -> Integer.parseInt(e.getKey().toString()), // 將 key 轉換為 Integer
+                        e -> Integer.parseInt(e.getValue().toString()) // 將 value 轉換為 Integer
+                ));
 
-        // 查詢所有產品的資料1
-        List<Integer> productIds = cartResult.keySet().stream()
-                .map(key -> Integer.parseInt(key.toString()))
-                .collect(Collectors.toList()); //[2,1,3,4]
-        List<Product> products = productRepository.findAllById(productIds); //[Product2, Product1, Product3, Product4]
+        // 一次性查詢所有產品資訊，並將結果存到 Map 中，減少重複查詢
+        List<Product> products = productRepository.findAllById(cartResult.keySet());
 
-        // 查詢所有廠商資料
-        Map<Integer, Vendor> vendorMap = products.stream()
-                .map(Product::getSupplierId)
-                .distinct()
-                .collect(Collectors.toMap(vendorId -> vendorId, vendorId -> vendorRepository.getReferenceById(vendorId)));
-        // key:1, value:VendorA,     key:2, value:VendorB
+        // 廠商 Map，使用 Vendor 作為 Key，商品清單作為 Value
+        Map<Vendor, List<ProductVO.ProductItem>> vendorMap = new HashMap<>();
 
-        List<Picture> pictures = pictureRepository.findAllById(productIds);
+        products.forEach(product -> {
+            Vendor vendor = product.getVendor();
 
-        // 將 productIds 作為 key，從 Picture 中提取 picture 屬性作為值
-//        Map<Integer, byte[]> pictureMap = IntStream.range(0, productIds.size())
-//                .boxed()
-//                .collect(Collectors.toMap(productIds::get, i -> pictures.get(i).getPicture()));
-
-//        Map<Integer, byte[]> pictureMap = IntStream.range(0, Math.min(productIds.size(), pictures.size()))
-//                .boxed()
-//                .collect(Collectors.toMap(productIds::get, i -> pictures.get(i).getPicture()));
-
-
-        // 整合資料
-        Map<Integer, ProductVO> productVOMap = new HashMap<>();
-
-        for (Map.Entry<Object, Object> entry : cartResult.entrySet()) {
-            Integer productId = Integer.parseInt(entry.getKey().toString());
-            Integer quantity = Integer.parseInt(entry.getValue().toString());
-
-            Product product = products.stream()
-                    .filter(p -> p.getProductId().equals(productId))
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
-
-            // 廠商資料
-            Vendor vendor = vendorMap.get(product.getSupplierId());
-            String vendorName = vendor.getShopName();
-
-
-            // 建立 ProductItem
-            Integer price = product.getPrice();
-            ProductVO.ProductItem item = new ProductVO.ProductItem(
-                    productId,
+            // 構建商品項目
+            ProductVO.ProductItem productItem = new ProductVO.ProductItem(
+                    product.getProductId(),
                     product.getProductName(),
                     product.getProductSpec(),
-                    "pic",  // 用"pic"替代真實圖片的Base64，根據需求可以切換
                     product.getPrice(),
-                    quantity
+                    cartResult.get(product.getProductId())
             );
 
-            // 檢查該廠商的 ProductVO 是否已存在
-            ProductVO productVO = productVOMap.get(product.getSupplierId());
-            if (productVO == null) {
-                productVO = new ProductVO(product.getSupplierId(), vendorName, new ArrayList<>());
-                productVOMap.put(product.getSupplierId(), productVO);
-            }
+            // 如果 Map 中已經存在該 Vendor，則添加到該 Vendor 的商品清單
+            vendorMap.computeIfAbsent(vendor, k -> new ArrayList<>()).add(productItem);
+        });
 
-            // 加入商品至對應廠商的 productList
-            productVO.getProductList().add(item);
+        // 最後將 Map 轉換為 List<ProductVO>
+        return vendorMap.entrySet().stream()
+                .map(entry -> new ProductVO(
+                        entry.getKey().getId(),
+                        entry.getKey().getShopName(),
+                        entry.getValue()
+                ))
+                .collect(Collectors.toList());
+    }
+
+
+    public byte[] productPicture(Integer productId) {
+        List<Picture> byProductProductId = pictureRepository.findByProduct_ProductId(productId);
+        if(!byProductProductId.isEmpty()){
+            Picture firstPicture = byProductProductId.get(0);
+            return firstPicture.getPicture();
         }
-
-        // 返回所有廠商的 ProductVO 列表
-        return new ArrayList<>(productVOMap.values());
+        return null;
     }
 
-    public List<Picture> viewProduct(Integer productId) {
-        return pictureRepository.findByProduct_ProductId(productId);
-    }
 }

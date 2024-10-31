@@ -75,6 +75,7 @@ public class OrderItemService {
             orderitem.setProductId(item.getProductId());
             orderitem.setQuantity(item.getQuantity());
             orderitem.setPrice(item.getPrice());
+            orderitem.setPickAddress(checkoutRequest.getAddress());
 
             // 購買的商品 存到資料庫
             orderItemRepository.save(orderitem);

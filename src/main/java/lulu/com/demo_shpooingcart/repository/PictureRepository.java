@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface PictureRepository extends JpaRepository<Picture, Integer> {
     List<Picture> findByProduct_ProductId(Integer productId);
+
+
 }

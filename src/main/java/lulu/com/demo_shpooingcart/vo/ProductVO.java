@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Data
@@ -23,7 +24,6 @@ public class ProductVO {
         private Integer productId;
         private String productName;
         private String productSpec;
-        private String picture;
         private Integer price;
         private Integer quantity;
 

@@ -12,4 +12,5 @@ import java.util.List;
 public class CheckoutRequest {
     private Integer userId;
     private List<CheckoutItem> items;
+    private String address;
 }
