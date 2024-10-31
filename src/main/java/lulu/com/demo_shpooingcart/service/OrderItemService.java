@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,7 @@ public class OrderItemService {
     private OrderRepository orderRepository;
     @Autowired
     private OrderItemRepository orderItemRepository;
+
     public void saveOrder(CheckoutRequest checkoutRequest) {
         Integer userId = checkoutRequest.getUserId();
         List<CheckoutItem> checkoutRequestItems = checkoutRequest.getItems();
@@ -32,7 +34,6 @@ public class OrderItemService {
 
         // 新增訂單
         for (CheckoutItem item : checkoutRequestItems) {
-
             // 如果該 vendorId 不存在於 map 中，則初始化金額，否則累加金額
             if (!map.containsKey(item.getVendorId())) {
                 map.put(item.getVendorId(), item.getPrice()*item.getQuantity());
@@ -41,12 +42,15 @@ public class OrderItemService {
             }
         }
 
+        // 用來儲存成功新增的訂單，Key: 廠商ID , Value: 訂單ID
+        Map<Integer, Integer> orderMap = new HashMap<>();
+
         // map Key: 廠商 ID, value: 使用者在該廠商下單的所有產品金額
         map.forEach((vendorId, amount) -> {
             Order order = new Order();
 
             User user = new User();
-            user.setId(userId);
+            user.setUserId(userId);
             order.setUser(user);
 
             order.setOrderStatus(0);
@@ -60,7 +64,9 @@ public class OrderItemService {
             order.setTotalAmount(amount);
 
             // 訂單 存到資料庫
-            orderRepository.save(order);
+            Order savedOrder  = orderRepository.save(order);
+            // 使用 Order 物件作為 Key，Order 的 ID 作為 Value，加入到 Map 中
+            orderMap.put(vendorId,savedOrder.getId());
 
         });
 
@@ -70,12 +76,12 @@ public class OrderItemService {
             // 創建購買的商品物件
             Orderitem orderitem = new Orderitem();
 
-            Order referenceById = orderRepository.getReferenceById(item.getVendorId());
-            orderitem.setOrderId(referenceById.getId());
+            Integer orderID = orderMap.get(item.getVendorId());
+            orderitem.setOrderId(orderID);
             orderitem.setProductId(item.getProductId());
             orderitem.setQuantity(item.getQuantity());
             orderitem.setPrice(item.getPrice());
-            orderitem.setPickAddress(checkoutRequest.getAddress());
+            orderitem.setPickAddress("待補"); //TODO
 
             // 購買的商品 存到資料庫
             orderItemRepository.save(orderitem);
@@ -90,7 +96,7 @@ public class OrderItemService {
 
     public List<Order> getMyOrder(Integer userId){
         // 購物車成功下單的商品
-        return orderRepository.findByUser_Id(userId);
+        return orderRepository.findByUser_UserId(userId);
     }
     public List<MyOrderItemResponse> getmyOrderitems(Integer orderId) {
         List<Object[]> orderDetailsByOrderId = orderItemRepository.findOrderDetailsByOrderId(orderId);

@@ -64,54 +64,52 @@
 </div>
 
 
-<!-- 訂單彈出視窗 -->
-<div id="orderPopup" class="popup">
-    <div class="popup-content">
-        <div class="popup-header">
-            <h2 id="shopname">★商城AAA★</h2>
-            <span class="close-btn" onclick="closePopup()">×</span>
-        </div>
-        <p>感謝您的支持和信任，這是您的訂單</p>
-        <div class="order-details">
-            <h3>訂單詳情</h3>
-            <table>
-                <tr>
-                    <th>訂購姓名</th>
-                    <td id="username">範例姓名</td> <!-- 插入靜態資料 -->
-                </tr>
-                <tr>
-                    <th>E-mail</th>
-                    <td id="email">example@example.com</td> <!-- 插入靜態資料 -->
-                </tr>
-                <tr>
-                    <th>訂單號碼</th>
-                    <td id="orderId">123456789</td> <!-- 插入靜態資料 -->
-                </tr>
-                <tr>
-                    <th>訂購日期</th>
-                    <td id="createTime">2024-10-28</td> <!-- 插入靜態資料 -->
-                </tr>
-                <tr>
-                    <th>訂單金額</th>
-                    <td id="totalAmount">NT$ 1200</td> <!-- 插入靜態資料 -->
-                </tr>
-                <tr>
-                    <th>預計取貨時間</th>
-                    <td id="pickTime">2024-10-29</td> <!-- 插入靜態資料 -->
-                </tr>
-                <tr>
-                    <th>付款方式</th>
-                    <td>現金</td> <!-- 插入靜態資料 -->
-                </tr>
-                <tr>
-                    <th>取貨地址</th>
-                    <td id="pickAddress">台北市某路123號</td> <!-- 插入靜態資料 -->
-                </tr>
-            </table>
-
-            <h3>訂購商品明細</h3>
-            <div class="product-details">
-                <table>
+<!-- Modal -->
+<div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5>感謝您的支持和信任，這是您的訂單</h5>
+                <h5>訂單詳情</h5>
+                <table class="table">
+                    <tr>
+                        <td>訂購姓名</td>
+                        <td id="orderCustomerName"></td>
+                    </tr>
+                    <tr>
+                        <td>E-mail</td>
+                        <td id="orderEmail"></td>
+                    </tr>
+                    <tr>
+                        <td>訂單編碼</td>
+                        <td id="orderNumber"></td>
+                    </tr>
+                    <tr>
+                        <td>訂購日期</td>
+                        <td id="orderDate"></td>
+                    </tr>
+                    <tr>
+                        <td>訂單金額</td>
+                        <td id="orderAmount"></td>
+                    </tr>
+                    <tr>
+                        <td>預計取貨時間</td>
+                        <td id="pickupDate"></td>
+                    </tr>
+                    <tr>
+                        <td>付款方式</td>
+                        <td id="paymentMethod"></td>
+                    </tr>
+                    <tr>
+                        <td>取貨地址</td>
+                        <td id="pickupAddress"></td>
+                    </tr>
+                </table>
+                <h5>訂購商品明細</h5>
+                <table class="table">
                     <thead>
                     <tr>
                         <th>商品名稱</th>
@@ -119,23 +117,18 @@
                         <th>小計</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    <tr>
-                        <td>商品A</td> <!-- 插入靜態資料 -->
-                        <td>2</td> <!-- 插入靜態資料 -->
-                        <td>NT$ 600</td> <!-- 小計: 商品價格 * 數量 -->
-                    </tr>
-                    <tr>
-                        <td>商品B</td> <!-- 插入靜態資料 -->
-                        <td>1</td> <!-- 插入靜態資料 -->
-                        <td>NT$ 300</td> <!-- 小計: 商品價格 * 數量 -->
-                    </tr>
+                    <tbody id="orderItemsTableBody">
+                    <!-- 商品項目會在這裡被追加 -->
                     </tbody>
                 </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
             </div>
         </div>
     </div>
 </div>
+
 
 </body>
 
@@ -165,126 +158,109 @@
         return `${year}-${month}-${day} ${hours}:${minutes}`;
     }
 
-    // 定義 API URL
-    const userId = 'exampleUserId'; // 替代 fakUserId
-    const apiUrl = `http://localhost:8083/order/${fakUserId}`;
-
-    function getOrder(userId) {
-        // 使用 fetch API 取得訂單資料
-        fetch(apiUrl, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json'
-            }
-        })
+    // 訂單 Table API
+    function getOrder() {
+        const url = `${port}/order/${fakUserId}`;
+        return fetch(url)
             .then(response => {
                 if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                    throw new Error('Network response was not ok ' + response.statusText);
                 }
                 return response.json();
             })
-            .then(data => {
-                // 顯示訂單資料
-                console.log(data);
-                displayOrders(data);
-            })
             .catch(error => {
-                console.error('Error fetching order data:', error);
-            });
-
+                console.error('There was a problem with the fetch operation:', error);
+            })
     }
 
-    getOrder(fakUserId);
-
     // 顯示訂單資料的函數
-    function displayOrders(orders) {
+    async function displayOrders() {
+        const orders = await getOrder();
         const orderTableBody = document.getElementById('orderTableBody');
         orderTableBody.innerHTML = '';  // 清空列表
         orders.forEach(order => {
             const tr = document.createElement('tr');
 
             // 取得訂單詳情並顯示在表格中
-            getOrderItems(order.id).then(orderItems => {
-                orderItems.forEach(item => {
-                    tr.innerHTML = `
-                    <td>${item.orderId}</td>
-                    <td>${formatDate(item.createTime)}</td>
-                    <td>${item.shopName}</td>
-                    <td>$${item.totalAmount}</td>
-                    <td>${formatDate(item.pickTime)}</td>
-                    <td><button onclick='showPopup(${JSON.stringify(item)})'>顯示訂單</button></td>
-                `;
-                    orderTableBody.appendChild(tr); // 追加到表格
-                });
-            }).catch(err => console.log(err));
+            tr.innerHTML = `
+            <td>${order.id}</td>
+            <td>${formatDate(order.createdDatetime)}</td>
+            <td>${order.vendor.shopName}</td>
+            <td>${order.totalAmount}</td>
+            <td>${formatDate(order.pickupDate)}</td>
+            <td><button class="btn btn-primary" onclick='getOrderItems(${order.id})'>顯示訂單</button></td>
+        `;
+            orderTableBody.appendChild(tr); // 追加到表格
 
-            orderTableBody.appendChild(tr);
         });
     }
 
+    displayOrders();
+
+    // 獲取訂單項目 API
+    function fetchOrderItems(orderId){
+        const url = `${port}/order/findOrderDetailsByOrderId/${orderId}`;
+        return fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            })
+    }
     // 獲取訂單項目
     async function getOrderItems(orderId) {
-        try {
-            const res = await fetch(`/order/findOrderDetailsByOrderId/${orderId}`);
-            // 先打印出原始 Response 物件
-            console.log("Response object:", res);
+        // 假設 fetchOrderItems 回傳訂單和訂單項目的詳細資料
+        const res = await fetchOrderItems(orderId);
+        const id = res[0].orderId; // 訂單編號
+        const username = res[0].username;
+        const email = res[0].email;
+        const orderDate = res[0].createTime;
+        const amount = res[0].totalAmount;
 
-            // 解析 JSON 之前，再次打印 JSON 資料
-            const data = await res.json();
-            console.log("Parsed JSON data:", data);
+        // 計算 pickupDate：orderDate 加上 7 天
+        const orderDateObj = new Date(orderDate);
+        orderDateObj.setDate(orderDateObj.getDate() + 7);
+        const pickupDate = orderDateObj.toISOString().slice(0, 16).replace('T', ' ');
 
-            return data;
-        } catch (err) {
-            console.log("Error fetching order items:", err);
-            return [];
-        }
-    }
+        const address = res[0].pickAddress;
 
-    // 顯示訂單細節視窗
-   async function showPopup(object) {
-        console.log("我亮了")
-        console.log(object);
-        document.getElementById('orderPopup').style.display = 'flex';
-        document.getElementById('shopname').innerHTML=object.shopName;
-        document.getElementById('username').innerText = object.username;
-        document.getElementById('email').innerText = object.email;
-        document.getElementById('orderId').innerText = object.orderId;
-        document.getElementById('createTime').innerText = formatDate(object.createTime);
-        document.getElementById('totalAmount').innerText = `NT$ ${object.totalAmount}`;
-        document.getElementById('pickTime').innerText = formatDate(object.pickTime);
-        document.getElementById('pickAddress').innerText = object.pickAddress;
+        // 填充訂單詳情
+        document.getElementById('orderNumber').textContent = id;
+        document.getElementById('orderCustomerName').textContent = username;
+        document.getElementById('orderEmail').textContent = email;
+        document.getElementById('orderDate').textContent = formatDate(orderDate);
+        document.getElementById('orderAmount').textContent = `NT$ ${amount}`;
+        document.getElementById('pickupDate').textContent = formatDate(pickupDate);
+        document.getElementById('paymentMethod').textContent = '現金';
+        document.getElementById('pickupAddress').textContent = address;
 
-        // 渲染商品明細
-        const productDetailsBody = document.querySelector('.product-details tbody');
-        productDetailsBody.innerHTML = ''; // 清空舊的商品明細
+        // 清空舊的商品明細
+        const orderItemsTableBody = document.getElementById('orderItemsTableBody');
+        orderItemsTableBody.innerHTML = '';
 
-        try {
-            // 使用 await 獲取訂單明細
-            const orderItems = await getOrderItems(object.orderId);
+        // 顯示每一個商品的明細
+        res.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+            <td>${item.productName}</td>
+            <td>${item.quantity}</td>
+            <td>NT$ ${item.price * item.quantity}</td>
+        `;
+            orderItemsTableBody.appendChild(tr); // 將每一項商品追加到表格中
+        });
 
-            // 假設 orderItems 是商品明細的陣列
-            orderItems.forEach(item => {
-                const tr = document.createElement('tr');
-                const subtotal = item.price * item.quantity;
-
-                tr.innerHTML = `
-                <td>${item.productName}</td>
-                <td>${item.quantity}</td>
-                <td>NT$ ${subtotal}</td>
-            `;
-
-                // 插入到商品明細表格中
-                productDetailsBody.appendChild(tr);
-            });
-        } catch (error) {
-            console.error("Error loading order items:", error);
-        }
-
+        // 顯示 Modal
+        const orderModal = new bootstrap.Modal(document.getElementById('orderModal'));
+        orderModal.show();
     }
 
 
     var currentPage = 1;
-    var itemsPerPage = 3;
+
 
 
 </script>

@@ -174,52 +174,54 @@ checkoutButton.addEventListener("click", function(event) {
     getCheckoutItems(event);
 });
 
+// 用於防止重複請求的旗標
+let isCheckoutInProgress = false;
+
 async function getCheckoutItems(event) {
+    if (isCheckoutInProgress) {
+        console.log('Checkout already in progress...');
+        return; // 如果已有結帳操作進行中，直接返回
+    }
+    isCheckoutInProgress = true; // 標記為進行中
 
     // 驗證地址是否填寫
     if (!orderForm.checkValidity()) {
         event.preventDefault();
         event.stopPropagation();
         orderForm.classList.add('was-validated'); // 添加 Bootstrap 驗證樣式
+        isCheckoutInProgress = false; // 重置旗標
         return; // 直接返回，不執行後續程式碼
     }
+
     // 驗證是否已選擇產品
-    const selectedItems = document.querySelectorAll('.item-checkbox:checked'); // 選取所有勾選的項目
+    const selectedItems = document.querySelectorAll('.item-checkbox:checked');
     if (selectedItems.length === 0) {
         alert('請選擇要結帳的商品');
+        isCheckoutInProgress = false; // 重置旗標
         return;
     }
 
-
-
     const address = document.getElementById('delivery-address').innerText;
-    // 每次執行前清空 checkoutItems 陣列
-    checkoutItems.length = 0;
-    // 準備一個變數來存儲總金額
+    checkoutItems.length = 0; // 清空 checkoutItems 陣列
     selectedItems.forEach(item => {
-        const cartItem = item.closest('.cart-item'); // 找到對應的商品元素
-        const productId = item.getAttribute('data-product-id'); // 從 checkbox 中取得商品 ID
-        const venderId = item.getAttribute('data-supplier-id');
-        const quantity = parseInt(cartItem.querySelector('.quantity').textContent); // 取得商品數量
-        const price = parseFloat(cartItem.querySelector('[data-price]').dataset.price); // 取得商品價格
-        checkoutItems.push({
-            productId: productId,
-            quantity: quantity,
-            price: price,
-            vendorId: venderId
-        });
+        const cartItem = item.closest('.cart-item');
+        const productId = item.getAttribute('data-product-id');
+        const vendorId = item.getAttribute('data-supplier-id');
+        const quantity = parseInt(cartItem.querySelector('.quantity').textContent);
+        const price = parseFloat(cartItem.querySelector('[data-price]').dataset.price);
+
+        checkoutItems.push({ productId, quantity, price, vendorId });
     });
 
-    console.log('購物的使用者:', fakUserId)
+    console.log('購物的使用者:', fakUserId);
     console.log('被勾選的商品：', checkoutItems);
-    console.log('地址:',address);
+    console.log('地址:', address);
     showSuccessModal(checkoutItems);
 
     try {
-        // 等待結帳的結果
-        await checkout(fakUserId, checkoutItems,address);
+        await checkout(fakUserId, checkoutItems, address);
 
-        // 移除購物車中已購買的商品
+        // 移除購物車已購買商品
         const productIds = checkoutItems.map(item => item.productId);
         await deleteProducts(fakUserId, productIds);
 
@@ -228,12 +230,13 @@ async function getCheckoutItems(event) {
 
         // 結帳成功後顯示提示
         showSuccessModal(checkoutItems);
-
     } catch (error) {
         console.error('結帳失敗:', error);
+    } finally {
+        isCheckoutInProgress = false; // 無論成功或失敗，重置旗標
     }
-
 }
+
 
 // 顯示成功購物的 Modal
 function showSuccessModal(checkoutItems) {

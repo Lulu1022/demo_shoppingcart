@@ -25,5 +25,4 @@ public class MyOrderItemResponse {
     private String shopName;
     private String username;
     private String email;
-
 }

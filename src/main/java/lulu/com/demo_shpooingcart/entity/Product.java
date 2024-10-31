@@ -41,19 +41,21 @@ public class Product {
     @JoinColumn(name = "vendor_id")
     private Vendor vendor;
 
-    @Column(name = "created_time")
-    private Instant createdTime;
 
-    @Column(name = "updated_time")
-    private Instant updatedTime;
+    @Column(name = "product_status")
+    private Integer productStatus;
 
-    @Column(name = "product_type")
-    private Integer productType;
-
-    @Column(name = "updaped_at")
-    private Instant updapedAt;
 
     @Column(name = "ad")
     private Integer ad;
+
+    @Column(name = "created_datetime")
+    private Instant createdDatetime;
+
+    @Column(name = "updated_datetime")
+    private Instant updatedDatetime;
+
+    @Column(name = "removed_datetime")
+    private Instant removedDatetime;
 
 }

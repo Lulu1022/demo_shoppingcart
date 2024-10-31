@@ -17,10 +17,10 @@ public interface OrderItemRepository extends JpaRepository<Orderitem, Integer> {
             "v.shop_name, " +
             "u.username, u.email " +
             "FROM `orders` o " +
-            "INNER JOIN `users` u ON o.user_id = u.user_id " +
-            "INNER JOIN `vendors` v ON o.vendor_id = v.vendor_id " +
-            "INNER JOIN `orderitems` oi ON o.order_id = oi.order_id " +
-            "INNER JOIN `products` p ON p.product_id = oi.product_id " +
+            "LEFT JOIN `users` u ON o.user_id = u.user_id " +
+            "LEFT JOIN `vendors` v ON o.vendor_id = v.vendor_id " +
+            "LEFT JOIN `orderitems` oi ON o.order_id = oi.order_id " +
+            "LEFT JOIN `products` p ON p.product_id = oi.product_id " +
             "WHERE o.order_id = ?", nativeQuery = true)
     List<Object[]> findOrderDetailsByOrderId(@Param("orderId") Integer orderId);
 

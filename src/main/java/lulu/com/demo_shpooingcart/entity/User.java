@@ -18,7 +18,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id", nullable = false)
-    private Integer id;
+    private Integer userId;
 
     @Column(name = "username",nullable = false)
     private String username;
@@ -65,16 +65,6 @@ public class User {
     private Byte newsletterSubscriptionConsentField;
 
     @NotNull
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "created_datetime", nullable = false)
-    private Instant createdDatetime;
-
-    @NotNull
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "updated_datetime", nullable = false)
-    private Instant updatedDatetime;
-
-    @NotNull
     @ColumnDefault("0")
     @Column(name = "group_points", nullable = false)
     private Integer groupPoints;
@@ -82,5 +72,13 @@ public class User {
     @NotNull
     @Column(name = "interests_tag", nullable = false)
     private Integer interestsTag;
+
+    @NotNull
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
+
+    @NotNull
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 
 }
